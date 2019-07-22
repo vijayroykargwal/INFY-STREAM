@@ -1,0 +1,21 @@
+------------------------------------ATTRIBUTE NAME---------------------
+REQUESTOR_G04
+ITEM_NAME_G04
+QUANTITY_G04
+PO_MANGER_G04
+CATEGORY_NAME_G04
+INTEL_SUPPLIER_G04
+INTEL_QUOTE_VALUE_G04
+INTEL_FINAL_PRICE_G04
+SAMSUNG_QUOTE_VALUE_G04
+SAMSUNG_FINAL_PRICE_G04
+TEXAS_INS_QUOTE_VALUE
+TEXAS_INS_FINAL_PRICE_G04
+FINAL_PRICE
+SUP_SEL_DROP_DOWN_G04
+----------------------SEQUENCES--------------------------------
+create sequence seq_invoice_data_g04 start with 10397760;
+create sequence seq_po_data_g04 start with 1039889;
+create sequence seq_req_data_g04 start with 138; 
+create sequence seq_transaction_number_g04 start with 2000001;
+create sequence seq_vat_registration_id_g04 start with 2345678901;

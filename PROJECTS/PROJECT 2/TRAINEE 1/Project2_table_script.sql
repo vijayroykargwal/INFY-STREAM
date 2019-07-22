@@ -1,0 +1,72 @@
+CREATE TABLE XX_ITEM_CATEGORY_04 (
+CATEGORY_ID VARCHAR2(10),
+CATEGORY_NAME VARCHAR2(50)
+);
+
+CREATE TABLE XX_ITEM_DETAILS_04(
+ITEM_ID VARCHAR2(10),
+ITEM_NAME VARCHAR2(30),
+CATEGORY  VARCHAR2(10),
+PRICE     NUMBER
+);
+CREATE TABLE XX_SUPPLIER_TEMP_P2_G04(
+SUPPLIER_ID                VARCHAR2(10),  
+SUPPLIER_NAME              VARCHAR2(240), 
+CATEGORY_NAME              VARCHAR2(50),  
+ITEM_NAME                  VARCHAR2(50) , 
+QNTY_AVAILABLE             NUMBER ,       
+UNIT_PRICE                 NUMBER ,       
+SHIP_TO_LOCATION_ID        NUMBER ,       
+BILL_TO_LOCATION_ID        NUMBER  ,      
+INVOICE_CURRENCY_CODE      VARCHAR2(30),  
+PAYMENT_CURRENCY_CODE      VARCHAR2(30),  
+START_DATE_ACTIVE          DATE,          
+CITY                       VARCHAR2(60),  
+COUNTRY                    VARCHAR2(60),  
+RECORD_STATUS              VARCHAR2(30),  
+VERIFY_FLAG                CHAR(1) ,      
+ERROR_MESSAGE              VARCHAR2(240)
+);
+
+CREATE TABLE XX_SUPPLIERS_INT_P2_G04(
+SUPPLIER_ID                VARCHAR2(10),  
+SUPPLIER_NAME              VARCHAR2(240), 
+CATEGORY_NAME              VARCHAR2(50) , 
+ITEM_NAME                  VARCHAR2(50) , 
+QNTY_AVAILABLE             NUMBER ,       
+UNIT_PRICE                 NUMBER ,       
+CREATED_BY                 VARCHAR2(100), 
+CREATION_DATE              DATE   ,       
+LAST_UPDATE_DATE           DATE   ,       
+LAST_UPDATE_LOGIN          VARCHAR2(100), 
+LAST_UPDATED_BY            VARCHAR2(100) ,
+SHIP_TO_LOCATION_ID        NUMBER ,       
+BILL_TO_LOCATION_ID        NUMBER ,       
+INVOICE_CURRENCY_CODE      VARCHAR2(30),  
+PAYMENT_CURRENCY_CODE      VARCHAR2(30),  
+START_DATE_ACTIVE          DATE    ,      
+CITY                       VARCHAR2(60)  ,
+COUNTRY                    VARCHAR2(60) 
+);
+
+CREATE TABLE XX_SUPPLIER_BASE_P2_G04(
+SUPPLIER_ID                VARCHAR2(10),  
+SUPPLIER_NAME              VARCHAR2(240), 
+CATEGORY_NAME              VARCHAR2(50),  
+ITEM_NAME                  VARCHAR2(50),  
+QNTY_AVAILABLE             NUMBER  ,      
+UNIT_PRICE                 NUMBER  ,      
+CREATED_BY                 VARCHAR2(100), 
+CREATION_DATE              DATE  ,        
+LAST_UPDATE_DATE           DATE   ,       
+LAST_UPDATE_LOGIN          VARCHAR2(100) ,
+LAST_UPDATED_BY            VARCHAR2(100), 
+SHIP_TO_LOCATION_ID        NUMBER  ,      
+BILL_TO_LOCATION_ID        NUMBER     ,   
+INVOICE_CURRENCY_CODE      VARCHAR2(30)  ,
+PAYMENT_CURRENCY_CODE      VARCHAR2(30) , 
+START_DATE_ACTIVE          DATE   ,       
+CITY                       VARCHAR2(60),  
+COUNTRY                    VARCHAR2(60)
+);
+
