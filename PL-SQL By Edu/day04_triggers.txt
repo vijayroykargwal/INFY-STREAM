@@ -1,0 +1,57 @@
+--statement level trigger
+CREATE OR REPLACE TRIGGER  trg_update_salary BEFORE
+UPDATE  OF salary ON Employees
+begin
+Dbms_Output.Put_line(' Updating the salry of an employee');
+end;
+
+
+--statement level trigger
+CREATE OR REPLACE TRIGGER  trg_update_salary BEFORE
+UPDATE  OF salary ON Employees
+begin
+if(to_char(sysdate,'day')='tuesday  ')then
+Dbms_Output.Put_Line('trg_update_salary');
+end if;
+end;
+
+--row level trigger
+--raising exception if something is not right
+CREATE OR REPLACE TRIGGER  trg_update_salary BEFORE 
+UPDATE of salary ON Employees FOR EACH ROW
+when (old.department_id=50)
+begin
+if(:old.salary>:new.salary) then
+Raise_Application_Error(-20000, 'Account past due.');
+end if;
+end;
+
+
+
+
+--checking for operation 
+CREATE OR REPLACE TRIGGER  trg_update_salary BEFORE 
+UPDATE OR INSERT OR DELETE ON Employees FOR EACH ROW
+when (old.department_id=50)
+begin
+if INSERTING then
+Dbms_Output.Put_Line('inserting');
+elsif UPDATING then
+Dbms_Output.Put_Line('updating');
+elsif DELETING then
+Dbms_Output.Put_Line('deleting');
+end if;
+end;
+
+
+
+-- updating :new record
+CREATE OR REPLACE TRIGGER  trg_update_salary BEFORE 
+UPDATE of salary ON Employees FOR EACH ROW
+when (old.department_id=50)
+begin
+Dbms_Output.Put_line(:new.salary);
+if(:old.salary>:new.salary) then
+:new.salary:=:old.salary;
+end if;
+end;

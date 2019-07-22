@@ -1,0 +1,69 @@
+
+--normal cursor
+
+declare 
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+cursor cur_emp_details is select first_name,last_name from EMPLOYEES where DEPARTMENT_ID=20;
+begin
+open cur_emp_details;
+fetch cur_emp_details into v_first_name,v_last_name;
+DBMS_OUTPUT.PUT_LINE(v_first_name);
+DBMS_OUTPUT.PUT_LINE(v_last_name);
+close cur_emp_details;
+end if;
+end;
+
+
+
+
+--using loop to fetch multiple rows
+
+declare 
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+cursor cur_emp_details is select first_name,last_name from EMPLOYEES where DEPARTMENT_ID=50;
+begin
+open cur_emp_details;
+loop
+fetch cur_emp_details into v_first_name,v_last_name;
+exit when cur_emp_details%notfound;
+DBMS_OUTPUT.PUT_LINE(v_first_name);
+DBMS_OUTPUT.PUT_LINE(v_last_name);
+end loop;
+close cur_emp_details;
+end;
+
+
+--Using cursor for loop
+
+declare 
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+cursor cur_emp_details is select first_name as fname,last_name from EMPLOYEES where DEPARTMENT_ID=20;
+begin
+for rec_emp_details in cur_emp_details
+loop
+DBMS_OUTPUT.PUT_LINE(rec_emp_details.fname);
+end loop;
+end;
+
+
+
+
+
+--cursor for loop with select statement
+declare 
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+begin
+for rec_emp_details in ( select first_name as fname,last_name from EMPLOYEES where DEPARTMENT_ID=20)
+loop
+DBMS_OUTPUT.PUT_LINE(rec_emp_details.fname);
+end loop;
+end;
+
+
+
+
+
