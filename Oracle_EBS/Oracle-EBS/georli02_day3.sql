@@ -1,0 +1,1216 @@
+ALTER TABLE REGIONS
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE REGIONS CASCADE CONSTRAINTS;
+
+CREATE TABLE REGIONS
+(
+  REGION_ID    NUMBER(2) CONSTRAINT REGION_ID_NN NOT NULL,
+  REGION_NAME  VARCHAR2(25 BYTE)
+);
+
+CREATE UNIQUE INDEX REG_ID_PK ON REGIONS
+(REGION_ID);
+
+ALTER TABLE REGIONS ADD (
+  CONSTRAINT REG_ID_PK
+  PRIMARY KEY
+  (REGION_ID)
+  USING INDEX REG_ID_PK
+  ENABLE VALIDATE);
+/
+
+ALTER TABLE COUNTRIES
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE COUNTRIES CASCADE CONSTRAINTS;
+
+CREATE TABLE COUNTRIES
+(
+  COUNTRY_ID    CHAR(2 BYTE) CONSTRAINT COUNTRY_ID_NN NOT NULL,
+  COUNTRY_NAME  VARCHAR2(40 BYTE),
+  REGION_ID     NUMBER(2)
+);
+
+CREATE UNIQUE INDEX COUNTRY_C_ID_PK ON COUNTRIES
+(COUNTRY_ID);
+
+ALTER TABLE COUNTRIES ADD (
+  CONSTRAINT COUNTRY_C_ID_PK
+  PRIMARY KEY
+  (COUNTRY_ID)
+  USING INDEX COUNTRY_C_ID_PK
+  ENABLE VALIDATE);
+
+ALTER TABLE COUNTRIES ADD (
+  CONSTRAINT COUNTR_REG_FK 
+  FOREIGN KEY (REGION_ID) 
+  REFERENCES REGIONS (REGION_ID)
+  ENABLE VALIDATE);
+/
+  
+ALTER TABLE LOCATIONS
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE LOCATIONS CASCADE CONSTRAINTS;
+
+CREATE TABLE LOCATIONS
+(
+  LOCATION_ID     NUMBER(4),
+  STREET_ADDRESS  VARCHAR2(40 BYTE),
+  POSTAL_CODE     VARCHAR2(12 BYTE),
+  CITY            VARCHAR2(30 BYTE) CONSTRAINT LOC_CITY_NN NOT NULL,
+  STATE_PROVINCE  VARCHAR2(25 BYTE),
+  COUNTRY_ID      CHAR(2 BYTE)
+);
+
+CREATE INDEX LOC_CITY_IX ON LOCATIONS
+(CITY);
+
+CREATE INDEX LOC_COUNTRY_IX ON LOCATIONS
+(COUNTRY_ID);
+
+CREATE UNIQUE INDEX LOC_ID_PK ON LOCATIONS
+(LOCATION_ID);
+
+CREATE INDEX LOC_STATE_PROVINCE_IX ON LOCATIONS
+(STATE_PROVINCE);
+
+
+ALTER TABLE LOCATIONS ADD (
+  CONSTRAINT LOC_ID_PK
+  PRIMARY KEY
+  (LOCATION_ID)
+  USING INDEX LOC_ID_PK
+  ENABLE VALIDATE);
+
+ALTER TABLE LOCATIONS ADD (
+  CONSTRAINT LOC_C_ID_FK 
+  FOREIGN KEY (COUNTRY_ID) 
+  REFERENCES COUNTRIES (COUNTRY_ID)
+  ENABLE VALIDATE);
+/
+  
+ALTER TABLE JOBS
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE JOBS CASCADE CONSTRAINTS;
+
+CREATE TABLE JOBS
+(
+  JOB_ID      VARCHAR2(10 BYTE),
+  JOB_TITLE   VARCHAR2(35 BYTE) CONSTRAINT JOB_TITLE_NN NOT NULL,
+  MIN_SALARY  NUMBER(6),
+  MAX_SALARY  NUMBER(6)
+);
+
+CREATE INDEX JOB_ID_PK ON JOBS
+(JOB_ID);
+
+ALTER TABLE JOBS ADD (
+  CONSTRAINT JOB_ID_PK
+  PRIMARY KEY
+  (JOB_ID)
+  USING INDEX JOB_ID_PK
+  ENABLE VALIDATE);
+/
+
+ALTER TABLE DEPARTMENTS
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE DEPARTMENTS CASCADE CONSTRAINTS;
+
+CREATE TABLE DEPARTMENTS
+(
+  DEPARTMENT_ID    NUMBER(4),
+  DEPARTMENT_NAME  VARCHAR2(30 BYTE) CONSTRAINT DEPT_NAME_NN NOT NULL,
+  MANAGER_ID       NUMBER(6),
+  LOCATION_ID      NUMBER(4)
+);
+
+CREATE UNIQUE INDEX DEPT_ID_PK ON DEPARTMENTS
+(DEPARTMENT_ID);
+
+ALTER TABLE DEPARTMENTS ADD (
+  CONSTRAINT DEPT_ID_PK
+  PRIMARY KEY
+  (DEPARTMENT_ID)
+  USING INDEX DEPT_ID_PK
+  ENABLE VALIDATE);
+  /
+  
+ALTER TABLE EMPLOYEES
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE EMPLOYEES CASCADE CONSTRAINTS;
+
+CREATE TABLE EMPLOYEES
+(
+  EMPLOYEE_ID     NUMBER(6),
+  FIRST_NAME      VARCHAR2(20 BYTE),
+  LAST_NAME       VARCHAR2(25 BYTE) CONSTRAINT EMP_LAST_NAME_NN NOT NULL,
+  EMAIL           VARCHAR2(25 BYTE) CONSTRAINT EMP_EMAIL_NN NOT NULL,
+  PHONE_NUMBER    VARCHAR2(20 BYTE),
+  HIRE_DATE       DATE CONSTRAINT EMP_HIRE_DATE_NN NOT NULL,
+  JOB_ID          VARCHAR2(10 BYTE) CONSTRAINT EMP_JOB_NN NOT NULL,
+  SALARY          NUMBER(8,2),
+  COMMISSION_PCT  NUMBER(2,2),
+  MANAGER_ID      NUMBER(6),
+  DEPARTMENT_ID   NUMBER(4)
+);
+
+CREATE INDEX EMP_DEPARTMENT_IX ON EMPLOYEES
+(DEPARTMENT_ID);
+
+CREATE UNIQUE INDEX EMP_EMAIL_UK ON EMPLOYEES
+(EMAIL);
+
+CREATE UNIQUE INDEX EMP_EMP_ID_PK ON EMPLOYEES
+(EMPLOYEE_ID);
+
+CREATE INDEX EMP_JOB_IX ON EMPLOYEES
+(JOB_ID);
+
+CREATE INDEX EMP_MANAGER_IX ON EMPLOYEES
+(MANAGER_ID);
+
+CREATE INDEX EMP_NAME_IX ON EMPLOYEES
+(LAST_NAME, FIRST_NAME);
+
+ALTER TABLE EMPLOYEES ADD (
+  CONSTRAINT EMP_SALARY_MIN
+  CHECK (salary > 0)
+  ENABLE VALIDATE,
+  CONSTRAINT EMP_EMP_ID_PK
+  PRIMARY KEY
+  (EMPLOYEE_ID)
+  USING INDEX EMP_EMP_ID_PK
+  ENABLE VALIDATE,
+  CONSTRAINT EMP_EMAIL_UK
+  UNIQUE (EMAIL)
+  USING INDEX EMP_EMAIL_UK
+  ENABLE VALIDATE);
+
+ALTER TABLE DEPARTMENTS ADD (
+  CONSTRAINT DEPT_LOC_FK 
+  FOREIGN KEY (LOCATION_ID) 
+  REFERENCES LOCATIONS (LOCATION_ID)
+  ENABLE VALIDATE,
+  CONSTRAINT DEPT_MGR_FK 
+  FOREIGN KEY (MANAGER_ID) 
+  REFERENCES EMPLOYEES (EMPLOYEE_ID)
+  ENABLE VALIDATE);
+
+ALTER TABLE EMPLOYEES ADD (
+  CONSTRAINT EMP_DEPT_FK 
+  FOREIGN KEY (DEPARTMENT_ID) 
+  REFERENCES DEPARTMENTS (DEPARTMENT_ID)
+  ENABLE VALIDATE,
+  CONSTRAINT EMP_JOB_FK 
+  FOREIGN KEY (JOB_ID) 
+  REFERENCES JOBS (JOB_ID)
+  ENABLE VALIDATE,
+  CONSTRAINT EMP_MANAGER_FK 
+  FOREIGN KEY (MANAGER_ID) 
+  REFERENCES EMPLOYEES (EMPLOYEE_ID)
+  ENABLE VALIDATE);
+/
+
+ALTER TABLE JOB_HISTORY
+ DROP PRIMARY KEY CASCADE;
+
+DROP TABLE JOB_HISTORY CASCADE CONSTRAINTS;
+
+CREATE TABLE JOB_HISTORY
+(
+  EMPLOYEE_ID    NUMBER(6) CONSTRAINT JHIST_EMPLOYEE_NN NOT NULL,
+  START_DATE     DATE,
+  END_DATE       DATE,
+  JOB_ID         VARCHAR2(10 BYTE) CONSTRAINT JHIST_JOB_NN NOT NULL,
+  DEPARTMENT_ID  NUMBER(4)
+);
+
+CREATE INDEX JHIST_DEPARTMENT_IX ON JOB_HISTORY
+(DEPARTMENT_ID);
+
+CREATE INDEX JHIST_EMPLOYEE_IX ON JOB_HISTORY
+(EMPLOYEE_ID);
+
+CREATE UNIQUE INDEX JHIST_EMP_ID_ST_DATE_PK ON JOB_HISTORY
+(EMPLOYEE_ID, START_DATE);
+
+CREATE INDEX JHIST_JOB_IX ON JOB_HISTORY
+(JOB_ID);
+
+
+
+
+SET DEFINE OFF;
+Insert into REGIONS
+   (REGION_ID, REGION_NAME)
+ Values
+   (1, 'Europe');
+Insert into REGIONS
+   (REGION_ID, REGION_NAME)
+ Values
+   (2, 'Americas');
+Insert into REGIONS
+   (REGION_ID, REGION_NAME)
+ Values
+   (3, 'Asia');
+Insert into REGIONS
+   (REGION_ID, REGION_NAME)
+ Values
+   (4, 'Middle East and Africa');
+COMMIT;
+
+SET DEFINE OFF;
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('AR', 'Argentina', 2);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('AU', 'Australia', 3);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('BE', 'Belgium', 1);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('BR', 'Brazil', 2);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('CA', 'Canada', 2);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('CH', 'Switzerland', 1);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('CN', 'China', 3);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('DE', 'Germany', 1);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('DK', 'Denmark', 1);
+Insert into COUNTRIES
+   (COUNTRY_ID, COUNTRY_NAME, REGION_ID)
+ Values
+   ('IN', 'INDIA', 3);
+COMMIT;
+
+SET DEFINE OFF;
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (1800, '147 Spadina Ave', 'M5V 2L7', 'Toronto', 'Ontario', 
+    'CA');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (1700, '6092 Boxwood St', 'YSW 9T2', 'Whitehorse', 'Yukon', 
+    'CA');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, COUNTRY_ID)
+ Values
+   (1400, '40-5-12 Laogianggen', '190518', 'Beijing', 'CN');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (1500, '1298 Vileparle (E)', '490231', 'Bombay', 'Maharashtra', 
+    'IN');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (2200, '12-98 Victoria Street', '2901', 'Sydney', 'New South Wales', 
+    'AU');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (2700, 'Schwanthalerstr. 7031', '80925', 'Munich', 'Bavaria', 
+    'DE');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (2800, 'Rua Frei Caneca 1360 ', '01307-002', 'Sao Paulo', 'Sao Paulo', 
+    'BR');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (2900, '20 Rue des Corps-Saints', '1730', 'Geneva', 'Geneve', 
+    'CH');
+Insert into LOCATIONS
+   (LOCATION_ID, STREET_ADDRESS, POSTAL_CODE, CITY, STATE_PROVINCE, 
+    COUNTRY_ID)
+ Values
+   (3000, 'Murtenstrasse 921', '3095', 'Bern', 'BE', 
+    'CH');
+COMMIT;
+
+SET DEFINE OFF;
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('AD_PRES', 'President', 20000, 40000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('FI_MGR', 'Finance Manager', 8200, 16000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('FI_ACCOUNT', 'Accountant', 4200, 9000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('PU_MAN', 'Purchasing Manager', 8000, 15000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('ST_CLERK', 'Stock Clerk', 2000, 5000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('IT_PROG', 'Programmer', 4000, 10000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('MK_REP', 'Marketing Representative', 4000, 9000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+   ('PR_REP', 'Public Relations Representative', 4500, 10500);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+    ('AD_VP','Administration Vice President',15000,30000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+    ('ST_MAN','Stock Manager',5500,8500);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+    ('MK_MAN','Marketing Manager',9000,15000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+    ('AC_MGR','Accounting Manager',8200,16000);
+Insert into JOBS
+   (JOB_ID, JOB_TITLE, MIN_SALARY, MAX_SALARY)
+ Values
+    ('AD_ASST','Administration Assistant',3000,6000);
+COMMIT;
+
+SET DEFINE OFF;
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('10', 'Administration', null, '1700');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('20', 'Marketing', null, '1800');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('30', 'Purchasing', null, '1700');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('50', 'Shipping', null, '1500');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('60', 'IT', null, '1400');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('70', 'Public Relations', null, '2700');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('90', 'Executive', null, '1700');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('100', 'Finance', null, '1700');
+Insert into DEPARTMENTS
+   (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID, LOCATION_ID)
+ Values
+   ('110', 'Accounting', null, '1700');
+COMMIT;
+
+
+SET DEFINE OFF;
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, DEPARTMENT_ID)
+ Values
+   (100, 'Steven', 'King', 'SKING', '515.123.4567', 
+    TO_DATE('06/17/1987 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'AD_PRES', 24000, 90);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (103, 'Alexander', 'Hunold', 'AHUNOLD', '590.423.4567', 
+    TO_DATE('01/03/1990 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 9000, null, 60);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (104, 'Bruce', 'Ernst', 'BERNST', '590.423.4568', 
+    TO_DATE('05/21/1991 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 6000, null, 60);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (105, 'David', 'Austin', 'DAUSTIN', '590.423.4569', 
+    TO_DATE('06/25/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 4800, null, 60);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (106, 'Valli', 'Pataballa', 'VPATABAL', '590.423.4560', 
+    TO_DATE('02/05/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 4800, null, 60);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (107, 'Diana', 'Lorentz', 'DLORENTZ', '590.423.5567', 
+    TO_DATE('02/07/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 4200, null, 60);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (108, 'Nancy', 'Greenberg', 'NGREENBE', '515.124.4569', 
+    TO_DATE('08/17/1994 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_MGR', 12000, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (109, 'Daniel', 'Faviet', 'DFAVIET', '515.124.4169', 
+    TO_DATE('08/16/1994 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_ACCOUNT', 9000, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (110, 'John', 'Chen', 'JCHEN', '515.124.4269', 
+    TO_DATE('09/28/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_ACCOUNT', 8200, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (111, 'Ismael', 'Sciarra', 'ISCIARRA', '515.124.4369', 
+    TO_DATE('09/30/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_ACCOUNT', 7700, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (112, 'Jose Manuel', 'Urman', 'JMURMAN', '515.124.4469', 
+    TO_DATE('03/07/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_ACCOUNT', 7800, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (113, 'Luis', 'Popp', 'LPOPP', '515.124.4567', 
+    TO_DATE('12/07/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'FI_ACCOUNT', 6900, null, 100);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (114, 'Den', 'Raphaely', 'DRAPHEAL', '515.127.4561', 
+    TO_DATE('12/07/1994 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'PU_MAN', 11000, null, 30);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (125, 'Julia', 'Nayer', 'JNAYER', '650.124.1214', 
+    TO_DATE('07/16/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3200, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (126, 'Irene', 'Mikkilineni', 'IMIKKILI', '650.124.1224', 
+    TO_DATE('09/28/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2700, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (127, 'James', 'Landry', 'JLANDRY', '650.124.1334', 
+    TO_DATE('01/14/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2400, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (128, 'Steven', 'Markle', 'SMARKLE', '650.124.1434', 
+    TO_DATE('03/08/2000 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2200, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (129, 'Laura', 'Bissot', 'LBISSOT', '650.124.5234', 
+    TO_DATE('08/20/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3300, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (130, 'Mozhe', 'Atkinson', 'MATKINSO', '650.124.6234', 
+    TO_DATE('10/30/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2800, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (131, 'James', 'Marlow', 'JAMRLOW', '650.124.7234', 
+    TO_DATE('02/16/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2500, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (132, 'TJ', 'Olson', 'TJOLSON', '650.124.8234', 
+    TO_DATE('04/10/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2100, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (133, 'Jason', 'Mallin', 'JMALLIN', '650.127.1934', 
+    TO_DATE('06/14/1996 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3300, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (134, 'Michael', 'Rogers', 'MROGERS', '650.127.1834', 
+    TO_DATE('08/26/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2900, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (135, 'Ki', 'Gee', 'KGEE', '650.127.1734', 
+    TO_DATE('12/12/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2400, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (136, 'Hazel', 'Philtanker', 'HPHILTAN', '650.127.1634', 
+    TO_DATE('02/06/2000 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2200, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (137, 'Renske', 'Ladwig', 'RLADWIG', '650.121.1234', 
+    TO_DATE('07/14/1995 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3600, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (138, 'Stephen', 'Stiles', 'SSTILES', '650.121.2034', 
+    TO_DATE('10/26/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3200, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (139, 'John', 'Seo', 'JSEO', '650.121.2019', 
+    TO_DATE('02/12/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2700, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (140, 'Joshua', 'Patel', 'JPATEL', '650.121.1834', 
+    TO_DATE('04/06/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2500, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (141, 'Trenna', 'Rajs', 'TRAJS', '650.121.8009', 
+    TO_DATE('10/17/1995 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3500, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (142, 'Curtis', 'Davies', 'CDAVIES', '650.121.2994', 
+    TO_DATE('01/29/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 3100, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (143, 'Randall', 'Matos', 'RMATOS', '650.121.2874', 
+    TO_DATE('03/15/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2600, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (144, 'Peter', 'Vargas', 'PVARGAS', '650.121.2004', 
+    TO_DATE('07/09/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_CLERK', 2500, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (202, 'Pat', 'Fay', 'PFAY', '603.123.6666', 
+    TO_DATE('08/17/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'MK_REP', 6000, null, 20);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (204, 'Hermann', 'Baer', 'HBAER', '515.123.8888', 
+    TO_DATE('06/07/1994 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'PR_REP', 10000, null, 70);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (101, 'Neena', 'Kochhar', 'NKOCHHAR', '515.123.4568', 
+    TO_DATE('09/21/1989 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'AD_VP', 17000, null, 90);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (102, 'Lex', 'De Haan', 'LDEHAAN', '515.123.4569', 
+    TO_DATE('01/13/1993 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'AD_VP', 17000, null, 90);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (120, 'Matthew', 'Weiss', 'MWEISS', '650.123.1234', 
+    TO_DATE('07/18/1996 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_MAN', 8000, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (121, 'Adam', 'Fripp', 'AFRIPP', '650.123.2234', 
+    TO_DATE('04/10/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_MAN', 8200, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (122, 'Payam', 'Kaufling', 'PKAUFLIN', '650.123.3234', 
+    TO_DATE('05/01/1995 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_MAN', 7900, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (123, 'Shanta', 'Vollman', 'SVOLLMAN', '650.123.4234', 
+    TO_DATE('10/10/1997 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_MAN', 6500, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (124, 'Kevin', 'Mourgos', 'KMOURGOS', '650.123.5234', 
+    TO_DATE('11/16/1999 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'ST_MAN', 5800, null, 50);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (201, 'Michael', 'Hartstein', 'MHARTSTE', '515.123.5555', 
+    TO_DATE('02/17/1996 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'MK_MAN', 13000, null, 20);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (205, 'Shelley', 'Higgins', 'SHIGGINS', '515.123.8080', 
+    TO_DATE('06/07/1994 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'AC_MGR', 12000, null, 110);
+Insert into EMPLOYEES
+   (EMPLOYEE_ID, FIRST_NAME, LAST_NAME, EMAIL, PHONE_NUMBER, 
+    HIRE_DATE, JOB_ID, SALARY, MANAGER_ID, DEPARTMENT_ID)
+ Values
+   (200, 'Jennifer', 'Whalen', 'JWHALEN', '515.123.4444', 
+    TO_DATE('09/17/1987 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'AD_ASST', 4400, null, 10);
+COMMIT;
+
+
+
+SET DEFINE OFF;
+Insert into JOB_HISTORY
+   (EMPLOYEE_ID, START_DATE, END_DATE, JOB_ID, DEPARTMENT_ID)
+ Values
+   (100, TO_DATE('06/17/1987 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), TO_DATE('07/24/1998 00:00:00', 'MM/DD/YYYY HH24:MI:SS'), 'IT_PROG', 90);
+   
+COMMIT;
+
+SET DEFINE OFF;
+UPDATE EMPLOYEES SET MANAGER_ID = 100 WHERE EMPLOYEE_ID IN (101,102,114,120,121,122,123,124,201);
+UPDATE EMPLOYEES SET MANAGER_ID = 102 WHERE EMPLOYEE_ID = 103;
+UPDATE EMPLOYEES SET MANAGER_ID = 103 WHERE EMPLOYEE_ID IN (104,105,106,107);
+UPDATE EMPLOYEES SET MANAGER_ID = 101 WHERE EMPLOYEE_ID = 108;
+UPDATE EMPLOYEES SET MANAGER_ID = 108 WHERE EMPLOYEE_ID IN (109,110,111,112,113);
+UPDATE EMPLOYEES SET MANAGER_ID = 120 WHERE EMPLOYEE_ID IN (125,126,127,128);
+UPDATE EMPLOYEES SET MANAGER_ID = 121 WHERE EMPLOYEE_ID IN (129,130,131,132);
+UPDATE EMPLOYEES SET MANAGER_ID = 122 WHERE EMPLOYEE_ID IN (133,134,135,136);
+UPDATE EMPLOYEES SET MANAGER_ID = 123 WHERE EMPLOYEE_ID IN (137,138,139,140);
+UPDATE EMPLOYEES SET MANAGER_ID = 124 WHERE EMPLOYEE_ID IN (141,142,143);
+COMMIT;
+
+SET DEFINE OFF;
+UPDATE DEPARTMENTS SET MANAGER_ID = 200 WHERE DEPARTMENT_ID = 10;
+UPDATE DEPARTMENTS SET MANAGER_ID = 201 WHERE DEPARTMENT_ID = 20;
+UPDATE DEPARTMENTS SET MANAGER_ID = 114 WHERE DEPARTMENT_ID = 30;
+UPDATE DEPARTMENTS SET MANAGER_ID = 121 WHERE DEPARTMENT_ID = 50;
+UPDATE DEPARTMENTS SET MANAGER_ID = 204 WHERE DEPARTMENT_ID = 70;
+UPDATE DEPARTMENTS SET MANAGER_ID = 100 WHERE DEPARTMENT_ID = 90;
+UPDATE DEPARTMENTS SET MANAGER_ID = 108 WHERE DEPARTMENT_ID = 100;
+UPDATE DEPARTMENTS SET MANAGER_ID = 205 WHERE DEPARTMENT_ID = 110;
+COMMIT;
+
+--------------------------------------------------------------------------Day-3-----------------------------------------------------------------
+set SERVEROUTPUT ON;
+--Anonymous block
+declare
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+BEGIN
+  select first_name,last_name into v_first_name,v_last_name 
+  from EMPLOYEES where employee_id=100;
+  dbms_output.put_line(v_first_name);
+  dbms_output.put_line(v_last_name);
+END;
+
+--create a stored fucntion
+create or replace function sf_get_emp_name(p_employee_id NUMBER)
+return varchar2
+as
+v_first_name EMPLOYEES.FIRST_NAME%type;
+v_last_name EMPLOYEES.laST_NAME%type;
+v_salary Employees.salary%type;
+BEGIN
+  select first_name,last_name,salary into v_first_name,v_last_name,v_salary
+  from EMPLOYEES where employee_id=p_employee_id;
+  return v_first_name||' '||v_last_name||' '||v_salary;
+END;
+
+
+--test the stored function from anonymous block
+declare 
+v_ful_name varchar2(500);
+begin 
+v_ful_name:=sf_get_emp_name(100);
+DBMS_OUTPUT.put_line(v_ful_name);
+end;
+
+
+--You can also call this stored function from select query
+select sf_get_emp_name(100) from dual;
+
+--Excer-30
+set serveroutput on;
+CREATE OR REPLACE FUNCTION sf_tax_calc(
+    p_employee_id employees.employee_id%TYPE)
+  RETURN NUMBER
+IS
+  --used for tax calculation
+  v_salary employees.salary%TYPE ;
+  v_tax_percentage NUMBER(2);
+  v_tax_amount NUMBER(8,2);
+BEGIN
+  --fetching salary of the given employee
+  SELECT salary INTO v_salary
+  FROM employees WHERE employee_id = p_employee_id;
+  --logic for tax percentage computation
+  IF v_salary        >=15000 THEN
+    v_tax_percentage := 15;
+  ELSIF v_salary      < 15000 AND v_salary >= 8000 THEN
+    v_tax_percentage := 10;
+  ELSE
+    v_tax_percentage := 0;
+  END IF;
+--formula for tax calculation
+v_tax_amount:=v_salary*v_tax_percentage*0.01;
+RETURN v_tax_amount;
+EXCEPTION
+WHEN OTHERS THEN
+  RETURN -1;
+  dbms_output.put_line('Some Error Occurred');
+END;
+
+declare
+v_salary employees.salary%type;
+v_salary1 employees.salary%type;
+v_salary2 employees.salary%type;
+begin
+v_salary := sf_tax_calc(120);
+v_salary1 :=sf_tax_calc(127);
+v_salary2 := sf_tax_calc(110);
+dbms_output.put_line(v_salary);
+dbms_output.put_line(v_salary1);
+dbms_output.put_line(v_salary2);
+end;
+
+--Excer31--
+desc departments;
+set serveroutput on;
+CREATE OR REPLACE FUNCTION sf_get_dept_id(p_department_name VARCHAR2)
+return Number
+as
+v_department_id departments.department_id%type;
+begin
+select department_id into v_department_id from departments where department_name=p_department_name;
+return v_department_id;
+exception
+when others then
+return -1;
+end;
+
+declare
+v_department_id departments.department_id%type;
+v_department_id1 departments.department_id%type;
+begin
+v_department_id := sf_get_dept_id('finance');
+v_department_id1:=sf_get_dept_id('sales');
+end;
+
+
+--excer32--
+CREATE OR REPLACE PROCEDURE sp_add_job(
+    p_job_id    IN jobs.job_id%TYPE,
+    p_job_title IN jobs.job_title%TYPE,
+    p_min_salary jobs.min_salary%TYPE,
+    p_max_salary jobs.max_salary%TYPE,
+    p_status OUT NUMBER)
+IS
+  --Used in job_id validation
+  v_count_of_jobs PLS_INTEGER;
+BEGIN
+  --Validating job_id
+  SELECT COUNT(Job_id) INTO v_count_of_jobs
+  FROM jobs WHERE job_id = p_job_ID;
+  IF(v_count_of_jobs=0) THEN
+    --Inserting the new job in the jobs table
+    INSERT INTO Jobs VALUES
+      (p_job_ID,p_job_title,p_min_salary,p_max_salary);
+    COMMIT;
+    --Insert successful.Setting p_status as 0
+    p_status:=0;
+  ELSE
+    --Job already exists.Setting p_status as -1
+    p_status:=-1;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    p_status:=-2;
+END;
+
+declare
+v_status number(1,0);
+begin
+sp_add_job('sl_man','sales manager',9500,20000,v_status);
+if v_status = 0 then
+dbms_output.put_line('New job is added successfully');
+elsif v_status=-1 then
+dbms_output.put_line('Job_id already exist');
+else
+dbms_output.put_line('Some error occurred');
+end if;
+end;
+
+--excer33--
+set SERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE sp_update_contact(p_employee_id employees.employee_id%type,
+p_new_phone_number employees.phone_number%type, p_status out number)
+as
+v_count_of_id pls_integer;
+begin
+select count(employee_id) into v_count_of_id from employees where employee_id = p_employee_id;
+if v_count_of_id !=0 then
+update employees set phone_number = p_new_phone_number where employee_id = p_employee_id;
+commit;
+p_status:=0;
+else
+p_status := -1;
+end if;
+exception
+when others then 
+p_status := -2;
+end;
+set SERVEROUTPUT ON;
+DECLARE
+  --used to store value of out parameter
+  v_status NUMBER(1,0);
+BEGIN
+  sp_update_contact(138,'650.121.2022',v_status);
+  IF v_status=0 THEN
+    DBMS_OUTPUT.PUT_LINE('phone number updated');
+  ELSIF v_status=-1 THEN
+    DBMS_OUTPUT.PUT_LINE('employee doesnot exists');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('Some error occurred');
+  END IF;
+END;
+
+--Excer34--
+create sequence seq_employee_id
+start with 301
+increment by 1;
+
+ --Excer35--
+ CREATE OR REPLACE FUNCTION sf_get_dept_id(p_department_name VARCHAR2)
+return Number
+as
+v_department_id departments.department_id%type;
+v_count_of_department pls_integer;
+begin
+select count(department_name) into v_count_of_department from departments where department_name= p_department_name;
+if(v_count_of_department!=0) then
+select department_id into v_department_id from departments where department_name=p_department_name;
+return v_department_id;
+else
+return -1;
+end if;
+exception
+when TOO_MANY_ROWS then
+return -2;
+when others then
+return -3;
+end;
+set SERVEROUTPUT ON;
+declare
+v_department_id departments.department_id%type;
+v_department_id1 departments.department_id%type;
+begin
+v_department_id := sf_get_dept_id('Executive');
+v_department_id1 := sf_get_dept_id('Support');
+dbms_output.put_line(v_department_id);
+dbms_output.put_line(v_department_id1);
+end;
+
+--Excer36--
+desc jobs;
+CREATE OR REPLACE FUNCTION sf_get_max_salary(p_job_id VARCHAR2)
+return NUMBER
+as
+v_max_salary jobs.max_salary%type;
+v_count_job pls_integer;
+begin
+select count(job_id) into v_count_job from jobs where job_id = p_job_id;
+if v_count_job !=0 then
+select max_salary into v_max_salary from jobs where job_id = p_job_id;
+return v_max_salary;
+else
+return -1;
+end if;
+exception
+when others then
+return -2;
+end;
+
+declare
+v_max_salary jobs.max_salary%type;
+v_max_salary1 jobs.max_salary%type;
+begin
+v_max_salary := sf_get_max_salary('FI_MGR');
+v_max_salary1 := sf_get_max_salary('AD_PRE');
+dbms_output.put_line(v_max_salary);
+dbms_output.put_line(v_max_salary1);
+end;
+
+--Excer37--
+select * from departments;
+CREATE OR REPLACE FUNCTION sf_get_manager_name(p_department_id number)
+return varchar2
+as
+v_manager_id departments.manager_id%type;
+v_first_name employees.first_name%type;
+begin
+select manager_id into v_manager_id from departments where department_id=p_department_id;
+select first_name into v_first_name from employees where employee_id=v_manager_id;
+return v_first_name;
+exception
+when others then
+return -1;
+end;
+set serveroutput on;
+declare
+v_manager_name employees.first_name%type;
+v_manager_name1 employees.first_name%type;
+v_manager_name2 employees.first_name%type;
+begin
+v_manager_name := sf_get_manager_name(30);
+v_manager_name1 := sf_get_manager_name(50);
+v_manager_name2 := sf_get_manager_name(51);
+dbms_output.put_line(v_manager_name);
+dbms_output.put_line(v_manager_name1);
+dbms_output.put_line(v_manager_name2);
+end;
+
+--Excer38--
+CREATE OR REPLACE FUNCTION sf_get_experience_employee(p_employee_id number)
+return number
+as
+v_experienced_year number(3,1);
+begin
+select (sysdate-hire_date)/365 into v_experienced_year from employees where employee_id=p_employee_id;
+return v_experienced_year;
+exception 
+when others then
+return -1;
+end;
+
+declare
+v_experienced_year number(3,1);
+v_experienced_year1 number(3,1);
+begin
+v_experienced_year := sf_get_experience_employee(100);
+v_experienced_year1 := sf_get_experience_employee(116);
+dbms_output.put_line(v_experienced_year);
+dbms_output.put_line(v_experienced_year1);
+end;
+
+--Excer39--
+select * from employees;
+CREATE OR REPLACE FUNCTION sf_get_emp_manager_id(p_employee_id number)
+return number
+as
+v_manager_id departments.manager_id%type;
+begin
+select manager_id into v_manager_id from employees where employee_id=p_employee_id;
+return v_manager_id;
+exception
+when others then
+return -1;
+end;
+
+
+set serveroutput on;
+
+
+declare
+v_manager_id employees.manager_id%type;
+v_manager_id1 employees.manager_id%type;
+begin
+v_manager_id := sf_get_emp_manager_id(201);
+v_manager_id1 := sf_get_emp_manager_id(4444);
+dbms_output.put_line(v_manager_id);
+dbms_output.put_line(v_manager_id1);
+end;
+
+--Excer-40--
+CREATE OR REPLACE FUNCTION sf_get_emp_manager_name(p_employee_id number)
+return varchar2
+as
+v_manager_id employees.manager_id%type;
+v_manager_name employees.first_name%type;
+v_count_employees pls_integer;
+v_count_manager pls_integer;
+begin
+select count(employee_id) into v_count_employees from employees where employee_id=p_employee_id;
+if  v_count_employees !=0 then
+select count(manager_id) into v_count_manager from employees where employee_id=p_employee_id;
+if v_count_manager !=0 then
+select manager_id into v_manager_id from employees where employee_id=p_employee_id;
+select first_name into v_manager_name from employees where employee_id=v_manager_id;
+return v_manager_name;
+else
+return -2;
+end if;
+else
+return -1;
+end if;
+exception
+when others then 
+return -3;
+end;
+set serveroutput on;
+declare
+v_manager_name employees.first_name%type;
+v_manager_name1 employees.first_name%type;
+v_manager_name2 employees.first_name%type;
+begin
+v_manager_name := sf_get_emp_manager_name(100);
+v_manager_name1 := sf_get_emp_manager_name(104);
+v_manager_name2 := sf_get_emp_manager_name(115);
+dbms_output.put_line(v_manager_name);
+dbms_output.put_line(v_manager_name1);
+dbms_output.put_line(v_manager_name2);
+end;
+
+
+--Excer 41--
+ CREATE OR REPLACE FUNCTION sf_get_emp_name_by_empid(p_employee_id number)
+ return varchar2
+ as
+ v_first_name employees.first_name%type;
+ v_last_name employees.last_name%type;
+ begin
+ select first_name,last_name into  v_first_name,v_last_name from employees where employee_id=p_employee_id;
+ return v_first_name||' '||v_last_name;
+ exception
+ when others then
+ return -1;
+ end;
+ 
+ declare
+ v_employee_name varchar2(500);
+ v_employee_name1 varchar2(500);
+ begin
+  v_employee_name:=sf_get_emp_name_by_empid(110);
+  v_employee_name1:=sf_get_emp_name_by_empid(119);
+  dbms_output.put_line(v_employee_name);
+   dbms_output.put_line(v_employee_name1);
+   end;
+   
+--Excer42--
+set serveroutput on;
+create or replace function sf_get_emp_name_by_email(p_email_id employees.email%type) return VARCHAR2 is
+ v_first_name employees.first_name%type;
+ v_last_name employees.last_name%type;
+ begin
+ select first_name,last_name into  v_first_name,v_last_name from employees where email=p_email_id;
+ return v_first_name||' '||v_last_name;
+  exception
+ when others then
+ return -1;
+ end;
+
+---Driver Program-----
+ declare
+ v_employee_name varchar2(500);
+ v_employee_name1 varchar2(500);
+ begin
+  v_employee_name:=sf_get_emp_name_by_email('JPATEL');
+  v_employee_name1:=sf_get_emp_name_by_email('S_KING');
+  dbms_output.put_line(v_employee_name);
+   dbms_output.put_line(v_employee_name1);
+   end;
+   
+----Excer43----
+create or replace function sf_get_location_address(p_department_id departments.department_id%type) return VARCHAR2 is
+v_street_address locations.street_address%type;
+v_city locations.city%type;
+v_state_province locations.state_province%type;
+v_postal_code locations.postal_code%type;
+v_country_ID locations.country_ID%type;
+begin
+select l.street_address,l.city,l.state_province,l.postal_code,l.country_id into v_street_address,v_city,v_state_province,v_postal_code,v_country_ID 
+from locations l inner join departments d on d.location_id=l.location_id where d.department_id=p_department_id;
+return v_street_address||','||v_city||','||v_state_province||','||v_postal_code||','||v_country_ID;
+ exception
+ when others then
+ return -1;
+ end;
+ 
+---Driver Program-----
+set serveroutput on;
+ declare
+ v_address varchar2(1000);
+ v_address_1 varchar2(1000);
+ begin
+   v_address:=sf_get_location_address(30);
+   v_address_1:=sf_get_location_address(31);
+   dbms_output.put_line(v_address);
+   dbms_output.put_line(v_address_1);
+   end;
+
+select * from locations;
+
+----Excer44---
